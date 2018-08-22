@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------------------
 #                     Author    : eFront-SwedFund
-#                     Time-stamp: "2018-08-22 15:17:15 jpdur"
+#                     Time-stamp: "2018-08-22 15:49:05 jpdur"
 # ------------------------------------------------------------------------------
-                                                 
+
 # ---------------------------------------------------------------------------
 # The received parameter is the directory where the script is to be executed
 # if nothing is received then let's use the directory where the script is
@@ -12,12 +12,12 @@ param(
 	  [Parameter(Mandatory=$false)] [string] $Exec_Dir = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
 )
 
-Function Release-Ref ($ref) 
+Function Release-Ref ($ref)
     {
         ([System.Runtime.InteropServices.Marshal]::ReleaseComObject(
         [System.__ComObject]$ref) -gt 0)
         [System.GC]::Collect()
-        [System.GC]::WaitForPendingFinalizers() 
+        [System.GC]::WaitForPendingFinalizers()
     }
 
 Function ConvertCSV-ToExcel
@@ -170,36 +170,37 @@ $fileName = $Exec_Dir + "\SwedenSoap3.xml"
 $xmlDoc = [System.Xml.XmlDocument](Get-Content $fileName);
 # $xmlDoc.Envelope.Body.getCrossRates.crossRequestParameters.datefrom
 # $xmlDoc.Envelope.Body.getCrossRates.crossRequestParameters.dateto
-write-host "Data before Processing " $xmlDoc.Envelope.Body.getCrossRates.crossRequestParameters.dateto
-                          
+# write-host "Data before Processing " $xmlDoc.Envelope.Body.getCrossRates.crossRequestParameters.dateto
+  
 # Modify the dates in the previous generation document Today and 4 physical days before
 #$xmlDoc.Envelope.Body.getCrossRates.crossRequestParameters.datefrom=((Get-Date).AddDays(-4).ToString("yyyy-MM-dd"))
 # $xmlDoc.Envelope.Body.getCrossRates.crossRequestParameters.datefrom= (Get-Date).AddDays(-1).ToString("yyyy-MM-dd")
 $xmlDoc.Envelope.Body.getCrossRates.crossRequestParameters.datefrom= (Get-Date).AddDays(-1).ToString("yyyy-MM-dd")
 $xmlDoc.Envelope.Body.getCrossRates.crossRequestParameters.dateto  = (Get-Date).ToString("yyyy-MM-dd")
-                          
-write-host "Data after Processing " $xmlDoc.Envelope.Body.getCrossRates.crossRequestParameters.dateto
-                          
+
+# Debug data
+# write-host "Data after Processing " $xmlDoc.Envelope.Body.getCrossRates.crossRequestParameters.dateto
+            
 # # Due to testing before 9:30
 # $xmlDoc.Envelope.Body.getCrossRates.crossRequestParameters.datefrom= ((Get-Date).AddDays(-1).ToString("yyyy-MM-dd"))
 # $xmlDoc.Envelope.Body.getCrossRates.crossRequestParameters.dateto  = ((Get-Date).AddDays(-1).ToString("yyyy-MM-dd"))
                           
 # Modify the updated document
 $xmlDoc.save($fileName)
-
+            
 # ------------------------ Extract Data from Riksbank ----------------------------------
 # Call of the extract from Riksbank - Example with hardcoded soap request file
 # $cmd ="curl --header ""Content-Type: text/xml;charset=UTF-8"" --header ""SOAPAction:getCrossRates"" --data @SwedenSoap3.msg https://swea.riksbank.se:443/sweaWS/services/SweaWebServiceHttpSoap12Endpoint -k -o ResultExtract.xml"
 $cmd ="curl --header ""Content-Type: text/xml;charset=UTF-8"" --header ""SOAPAction:getCrossRates"" --data @"+$fileName+" https://swea.riksbank.se:443/sweaWS/services/SweaWebServiceHttpSoap12Endpoint -k -o ResultExtract.xml"
-                                                                                                      
-# Store the command in a .bat file (Encoding ASCII guarantees that there is no odd character          
-$cmd | Out-File -Encoding ASCII "./go.bat"                                                            
-                                                                                                      
-# Execute the command                                                                                 
-& "./go.bat"                                                                                          
-                                                                                                      
-# Delete the intermediate file                                                                        
-rm go.bat                                                                                             
+            
+# Store the command in a .bat file (Encoding ASCII guarantees that there is no odd character
+$cmd | Out-File -Encoding ASCII "./go.bat"
+            
+# Execute the command
+& "./go.bat"
+            
+# Delete the intermediate file
+rm go.bat   
                                                                                                       
 # ------------------------ Preapre the value of the EUR/SEK FX Rate  ----------------------------------
 $SEKEURRate       = 0.0                                                                               
@@ -238,43 +239,42 @@ foreach( $PerCCy in $z.Envelope.Body.getCrossRatesResponse.return.groups.series)
     $BaseCCY = $PerCCy.seriesname.Substring(2,3)
     $CCY     = $PerCCy.seriesname.Substring(10,3)
 	If (($BaseCCY -eq "SEK") -And ($CCY.trim().length -eq 3) )
-    {
+    {       
 		foreach ($DateRate in $PerCCy.resultrows) {
-
+            
             # Debug - Check contents of date
 			# Write-Host "/" $DateRate.date "/" $DateRate.date.length
-
+            
 	 		# Change the string to date in order to be able to later choose the right format
 			# The $DateRate.date has actually more than the required 10 characters ==> Hence the checks
 			$DateFXRate  = [datetime]::ParseExact($DateRate.date.Substring(0,10), "yyyy-MM-dd", [CultureInfo]::InvariantCulture)
-
-            # $ValueFXRate = $DateRate.value.trim()
             $ValueFXRate = $DateRate.value
 
-			Write-Host "Verif" $Today $DateRate.date $ValueFXRate
-
+			# Debug data
+			# Write-Host "Verif" $Today $DateRate.date $ValueFXRate
+                        
 			if ( $Today -eq $DateRate.date) {
-
+                        
 				# Add the currency in the list of currencies provided by Riks Bank
 				[void] $RiksbankCCYList.Add($CCY)
-
+                        
 				# Store the EUR/SEK FX Rate
 				if ($CCY -eq "EUR") {
 					$SEKEURRate = [convert]::ToDecimal($ValueFXRate)
-				}
-
+				}       
+                        
 				# SwedFund uses the , as the decimal separator so we replace the . (\. to prevent regexpreson)
 				# $ValueFXRate = $ValueFXRate -replace "\.",","
-
+                        
 				# Debug the data to be written in the csv file
-				Write-Host "Verification" $BaseCCY $CCY $DateFXRate.ToString($DateFormat) $ValueFXRate
-
+				# Write-Host "Verification" $BaseCCY $CCY $DateFXRate.ToString($DateFormat) $ValueFXRate
+                  
 	 			$OutputCSV += "`n" +$CSVSep+$CSVSep + $DateFXRate.ToString($DateFormat)+$CSVSep+$CCY+$CSVSep+$BaseCCY+$CSVSep+$ValueFXRate+$CSVSep
-			}
-		}
-    }
-}
-
+			}     
+		}         
+    }             
+}                 
+                  
 # ----------------------------------------------------------------------------------------------------
 # ----------------------------------- Extract the Data from data.fixer.io ----------------------------
 # ----------------------------------------------------------------------------------------------------
@@ -282,7 +282,7 @@ foreach( $PerCCy in $z.Envelope.Body.getCrossRatesResponse.return.groups.series)
 # $request = "2017-12-31?access_key=eca17521f4e211d09ab357c6cd9585dc&base=EUR&symbols=USD,CAD,EUR,GBP"
   $request = (Get-Date -UFormat "%Y-%m-%d") + "?access_key=eca17521f4e211d09ab357c6cd9585dc&base=EUR" # JPD Key
 # $request = (Get-Date -UFormat "%Y-%m-%d") + "?access_key=9038512b080e95aba278254a579bbe16&base=EUR&symbols=USD,CAD,EUR,GBP" # Niclas key
-
+                  
 # ~~~~~~~~~~~~~~~~~~~~~~ Start Extract ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Extract the FX rates from the data.fixer.io Web Site which generated json
 $extractcmd = "wget ""http://data.fixer.io/api/"+ $request + """ -o LogFile.txt"
@@ -330,33 +330,33 @@ foreach ($k in ($HashFxRates | Get-Member -MemberType NoteProperty).Name) {
 	# We only add the currency if it has not already been provided by RiksBank                                                                                            
 	if ( -not ($RiksbankCCYList | Where-Object { $k -like $_} )) {                                                                                                        
 	    $OutputCSV += "`n" +$CSVSep+$CSVSep + $FXDateasDate.ToString($DateFormat)+$CSVSep+$k+$CSVSep+"SEK"+$CSVSep+[math]::Round(($HashFxRates.$k)*$SEKEURRate,4)+$CSVSep 
-	}
-}
-
+	}             
+}                 
+                  
 # ---------------------------- Package all the data into the CSV File -------------------------
-
+                  
 # Just save the created output into a CSV file
 $OutputCSV | Out-File -Encoding UTF8 ./FXrate.csv
-
+                  
 # Convert to XLS in order to sort all the conversion issues
-# ConvertCSV-ToExcel "FXRate.csv" "FXRate.xlsx"
-
+ConvertCSV-ToExcel "FXRate.csv" "FXRate.xlsx"
+                  
 # ------------------------ Import Data into eFront  ----------------------------------
 # Final Method to import the file // The log file is the one created on the server
 # $cmd = """"+ $Exec_Dir +"\FrontCmd.exe"" ExecWebEdgeImport /server:"""+$URL_WebSite+""" /userid:" +$Username+" /password:"+$Password+" /files:""" + $Exec_Dir+"\FxRate.xlsx"""
 $cmd = """"+ $Exec_Dir +"\FrontCmd.exe"" ExecWebEdgeImport /server:"""+$URL_WebSite+""" /userid:" +$Username+" /password:"+$Password+" /files:""" + $Exec_Dir+"\FxRate.csv"""
-
+                  
 # Store the command in a .bat file (Encoding ASCII guarantees that there is no odd character
 $cmd | Out-File -Encoding ASCII "./go.bat"
-
+                  
 # Execute the command
-& "./go.bat"
-
+& "./go.bat"      
+                  
 # Delete the intermediate file
-rm go.bat
-
+rm go.bat         
+                  
 # Cleanup the log files
-mv *.log log
-
+mv *.log log      
+                  
 # Debug Infop ==> List of RiksBank CCy
 # $RiksbankCCYList
