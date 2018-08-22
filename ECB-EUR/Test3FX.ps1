@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------------------
 #                     Author    : eFront-Mastek
-#                     Time-stamp: "2018-08-22 16:17:34 jpdur"
+#                     Time-stamp: "2018-08-22 16:23:43 jpdur"
 # ------------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
@@ -26,7 +26,7 @@ cd ($Exec_Dir)
 $extractcmd = "wget http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml -P """ + $Exec_Dir + """"
 
 # As we are working om the ($Exec_Dir) we want to be sure that the output file does not exist
-rm eurofxref-daily.xml
+rm eurofxref-daily.xml -ErrorAction SilentlyContinue
 
 # ---------------------------------------------------------------------------------------------
 # Store the command in a .bat file (Encoding ASCII guarantees that there is no odd character
@@ -38,7 +38,7 @@ $extractcmd | Out-File -Encoding ASCII "./goextract.bat"
 rm goextract.bat
 
 # Check the required file is available
-cat eurofxref-daily.xml
+# cat eurofxref-daily.xml
 
 $filter = "eurofxref-daily*.xml"
 
