@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------------------
 #                     Author    : eFront-Mastek
-#                     Time-stamp: "2018-06-25 10:21:52 jpdur"
+#                     Time-stamp: "2018-08-22 16:17:34 jpdur"
 # ------------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
@@ -28,23 +28,20 @@ $extractcmd = "wget http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml
 # As we are working om the ($Exec_Dir) we want to be sure that the output file does not exist
 rm eurofxref-daily.xml
 
-# Debug Check extract Command
-# $extractcmd
-  
 # ---------------------------------------------------------------------------------------------
 # Store the command in a .bat file (Encoding ASCII guarantees that there is no odd character
 # Execute the command
 # Delete the intermediate file
 # ---------------------------------------------------------------------------------------------
 $extractcmd | Out-File -Encoding ASCII "./goextract.bat"
-& "./goextract.bat"                                       
-rm goextract.bat     
-            
+& "./goextract.bat"
+rm goextract.bat
+
 # Check the required file is available
-# cat eurofxref-daily.xml
-              
+cat eurofxref-daily.xml
+
 $filter = "eurofxref-daily*.xml"
-              
+
 # Identify the file(s) in the Process Server and Process it accordingly
 # In that specific case it happens only if there is a TmpDvlperSalesMIS.xlsx file
 Get-ChildItem -path $Exec_Dir -filter $filter | Foreach-Object {
@@ -54,22 +51,22 @@ Get-ChildItem -path $Exec_Dir -filter $filter | Foreach-Object {
 	$Filename_NoExtension = $_.BaseName
 
 	# Read File Contents
-	$Result = Get-Content ($Data_Dir+"\"+$Filename_Process)
+	$Result = Get-Content ($Exec_Dir+"\"+$Filename_Process)
 
     # Prepare the result buffer with the header of the result
 	# $OutputCSV = "Reference date" + $CSVSep + "Source Currency" + $CSVSep + "Destination Currency" + $CSVSep + "Rate" + $CSVSep + "Description"
 	# String is single quoted to prevent interpreation of $ (cf. http://www.rlmueller.net/PowerShellEscape.htm)
-	$OutputCSV  = 'ef$class,ef$subclass,ef$col,ef$col,ef$col,ef$col'
-                    
-	# The type of header to be used depends on the system configuration 
+	$OutputCSV  = 'ef$class,ef$subclass,ef$col,ef$col,ef$col,ef$col'                                           
+                                
+	# The type of header to be used depends on the system configuration
 	if ($NewHeaderImport -eq 0) {
         $OutputCSV += "`n"+ "CurrencyRates,Standard,Rates.Reference date,Rates.Destination Currency,Rates.Source Currency,Rates.Rate"
-	}               
-    else {          
+	}
+    else {
 	    $OutputCSV += "`n"+"CurrencyRates,Standard,REFERENCEDATE_CUR,CURRENCY1_CUR,SRCCURRENCY_CUR,RATE1_CUR"
 	    $OutputCSV += "`n"+"CAPTIONS,,Rates.Reference date,Rates.Destination Currency,Rates.Source Currency,Rates.Rate"
 	    $OutputCSV += "`n"+"TYPES,,Date,List,List,Amount"
-	}               
+	}
                     
 	# Extract the lines of the contents
 	$ContentsReached = $false ;
@@ -129,7 +126,7 @@ Get-ChildItem -path $Exec_Dir -filter $filter | Foreach-Object {
 	# cat ./FXRate.csv
 
     # Final Method to import the file // The log file is the one created on the server
-	$cmd = """"+ $Data_Dir +"\FrontCmd.exe"" ExecWebEdgeImport /server:"""+$URL_WebSite+""" /userid:" +$Username+" /password:"+$Password+" /files:""" + $Data_Dir+"\FxRate.csv"""
+	$cmd = """"+ $Exec_Dir +"\FrontCmd.exe"" ExecWebEdgeImport /server:"""+$URL_WebSite+""" /userid:" +$Username+" /password:"+$Password+" /files:""" + $Exec_Dir+"\FxRate.csv"""
 
 	# Store the command in a .bat file (Encoding ASCII guarantees that there is no odd character
 	$cmd | Out-File -Encoding ASCII "./go.bat"
