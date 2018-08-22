@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------------------
 #                     Author    : eFront-Mastek
-#                     Time-stamp: "2018-08-22 12:24:29 jpdur"
+#                     Time-stamp: "2018-08-22 14:55:34 jpdur"
 # ------------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
@@ -111,7 +111,7 @@ $OutputCSV | Out-File ./FXrate.csv
 # cat ./FXRate.csv
 
 # Final Method to import the file // The log file is the one created on the server
-$cmd = """"+ $Exec_Dir +"\FrontCmd.exe"" ExecWebEdgeImport /server:"""+$URL_WebSite+""" /userid:" +$Username+" /password:"+$Password+" /files:""" + $Data_Dir+"\FxRate.csv"""
+$cmd = """"+ $Exec_Dir +"\FrontCmd.exe"" ExecWebEdgeImport /server:"""+$URL_WebSite+""" /userid:" +$Username+" /password:"+$Password+" /files:""" + $Exec_Dir+"\FxRate.csv"""
 
 # Store the command in a .bat file (Encoding ASCII guarantees that there is no odd character
 $cmd | Out-File -Encoding ASCII "./go.bat"
