@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------------------
 #                     Author    : eFront-SwedFund
-#                     Time-stamp: "2018-05-09 14:48:49 jpdur"
+#                     Time-stamp: "2018-10-08 16:59:17 jpdur"
 # ------------------------------------------------------------------------------
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DEPLOYMENT SPECIFIC !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -28,15 +28,20 @@ $DateFormat = "dd/MM/yyyy"      #Format to be used for European Date
 # Write-Host "Data Dir:"$Data_Dir
 # Write-Host "Exec Dir:"$Exec_Dir
 
-# Deployment Parameters JPD Test Envt ==> NewHeader to be used
-$Username        = "JPDUR"
-$Password        = "enc:XUo8nBW5J7LSESrtGA9T0p3hYUZVx4ynqXMfnSUY7Lk="
-$URL_WebSite     = "mandact"
 # $NewHeaderImport = 1
+
+# # Deployment Parameters JPD Test Envt ==> NewHeader to be used
+# $Username        = "JPDUR"
+# $Password        = "enc:XUo8nBW5J7LSESrtGA9T0p3hYUZVx4ynqXMfnSUY7Lk="
+# $URL_WebSite     = "mandact"
 
 # Deployment Parameters arcano
 # $Username       = "JPDUR"
 # $Password       = "enc:XUo8nBW5J7LSESrtGA9T0p3hYUZVx4ynqXMfnSUY7Lk="
 # $URL_WebSite    = "https://fi-prj-arcano.frontsrv.com"
 
-
+# Deployment Parameters PIC Test Envt 
+$Username        = "JPDUR"
+$Password        = "enc:XUo8nBW5J7LSESrtGA9T0p3hYUZVx4ynqXMfnSUY7Lk="
+$URL_WebSite     = "https://pic-dev.methys-pe.com"
+ 

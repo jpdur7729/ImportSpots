@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------------------
 #                     Author    : eFront
-#                     Time-stamp: "2018-08-22 17:07:04 jpdur"
+#                     Time-stamp: "2018-10-11 07:35:05 jpdur"
 # ------------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
@@ -23,6 +23,7 @@ cd ($Exec_Dir)
                                                                                                    
 # We built the request by default for today's rate and all available symbols
 # $request = "2017-12-31?access_key=eca17521f4e211d09ab357c6cd9585dc&base=EUR&symbols=USD,CAD,EUR,GBP"
+# $request = "2018-09-30?access_key=eca17521f4e211d09ab357c6cd9585dc&base=EUR"
 $request = (Get-Date -UFormat "%Y-%m-%d") + "?access_key=eca17521f4e211d09ab357c6cd9585dc&base=EUR"
 
 # ~~~~~~~~~~~~~~~~~~~~~~ Start Extract ~~~~~~~~~~~~~~~~~~~~~~~~~~
